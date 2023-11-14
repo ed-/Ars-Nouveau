@@ -2,6 +2,7 @@ package com.hollingsworth.arsnouveau.common.ritual;
 
 import com.hollingsworth.arsnouveau.api.ritual.AbstractRitual;
 import com.hollingsworth.arsnouveau.api.util.BlockUtil;
+import com.hollingsworth.arsnouveau.api.util.SpellUtil;
 import com.hollingsworth.arsnouveau.common.datagen.Recipes;
 import com.hollingsworth.arsnouveau.common.entity.EntityChimera;
 import com.hollingsworth.arsnouveau.common.entity.WildenGuardian;
@@ -37,11 +38,17 @@ public class RitualWildenSummoning extends AbstractRitual {
                     setFinished();
                 }
             }else{
-                if(getProgress() >= 8){
-                    BlockPos.betweenClosedStream(getPos().east(5).north(5).above(), getPos().west(5).south(5).above(5))
-                            .forEach(p -> BlockUtil.destroyBlockSafelyWithoutSound(getWorld(), p, true));
+                if (getProgress() >= 8) {
                     EntityChimera chimera = new EntityChimera(getWorld());
                     summon(chimera, getPos().above());
+                    for(BlockPos b : BlockPos.betweenClosed(getPos().east(5).north(5).above(), getPos().west(5).south(5).above(5))){
+                        if (!net.minecraftforge.event.ForgeEventFactory.getMobGriefingEvent(this.getWorld(), chimera)) {
+                            continue;
+                        }
+                        if (SpellUtil.isCorrectHarvestLevel(4, this.getWorld().getBlockState(b))) {
+                            BlockUtil.destroyBlockSafelyWithoutSound(getWorld(), b, true);
+                        }
+                    }
                     setFinished();
                 }
             }
